@@ -11,7 +11,7 @@ public class AttackResultBuilder {
   private String feedbackResourceBundleKey;
   private String output;
   private Object[] outputArgs;
-  private AssignmentEndpoint assignment;
+  private String assignmentName;
   private boolean attemptWasMade = false;
 
   public AttackResultBuilder assignmentCompleted(boolean lessonCompleted) {
@@ -44,19 +44,29 @@ public class AttackResultBuilder {
     return this;
   }
 
+  public AttackResultBuilder attemptWasMade(boolean attemptWasMade) {
+    this.attemptWasMade = attemptWasMade;
+    return this;
+  }
+
   public AttackResult build() {
     return new AttackResult(
-            assignmentCompleted,
+        assignmentCompleted,
         feedbackResourceBundleKey,
         feedbackArgs,
         output,
         outputArgs,
-        assignment.getClass().getSimpleName(),
+        assignmentName,
         attemptWasMade);
   }
 
   public AttackResultBuilder assignment(AssignmentEndpoint assignment) {
-    this.assignment = assignment;
+    this.assignmentName = assignment != null ? assignment.getClass().getSimpleName() : null;
+    return this;
+  }
+
+  public AttackResultBuilder assignment(String assignmentName) {
+    this.assignmentName = assignmentName;
     return this;
   }
 
