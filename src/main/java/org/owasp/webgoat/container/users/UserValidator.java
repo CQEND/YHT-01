@@ -4,6 +4,7 @@
  */
 package org.owasp.webgoat.container.users;
 
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
@@ -23,12 +24,21 @@ public class UserValidator implements Validator {
   @Override
   public void validate(Object o, Errors errors) {
     UserForm userForm = (UserForm) o;
+    String username = userForm.getUsername();
+    String password = userForm.getPassword();
 
-    if (userRepository.findByUsername(userForm.getUsername()) != null) {
+    if (username == null || username.trim().isEmpty()) {
+      errors.rejectValue("username", "username.blank", "This field is required.");
+    } else if (userRepository.findByUsername(username) != null) {
       errors.rejectValue("username", "username.duplicate");
     }
 
-    if (!userForm.getMatchingPassword().equals(userForm.getPassword())) {
+    if (Objects.equals(password, username)) {
+      errors.rejectValue(
+          "password", "password.username", "Password must not be the same as username.");
+    }
+
+    if (!Objects.equals(userForm.getMatchingPassword(), password)) {
       errors.rejectValue("matchingPassword", "password.diff");
     }
   }
