@@ -26,8 +26,8 @@ class UserValidatorTest {
     UserForm userForm = new UserForm();
     userForm.setAgree("true");
     userForm.setUsername("test1234");
-    userForm.setPassword("test1234");
-    userForm.setMatchingPassword("test1234");
+    userForm.setPassword("diffpass");
+    userForm.setMatchingPassword("diffpass");
     Errors errors = new BeanPropertyBindingResult(userForm, "userForm");
     new UserValidator(userRepository).validate(userForm, errors);
     Assertions.assertThat(errors.hasErrors()).isFalse();
@@ -59,5 +59,47 @@ class UserValidatorTest {
     new UserValidator(userRepository).validate(userForm, errors);
     Assertions.assertThat(errors.hasErrors()).isTrue();
     assertThat(errors.getFieldError("username").getCode()).isEqualTo("username.duplicate");
+  }
+
+  @Test
+  void shouldGiveErrorWhenUsernameIsOnlySpaces() {
+    UserForm userForm = new UserForm();
+    userForm.setAgree("true");
+    userForm.setUsername("   ");
+    userForm.setPassword("test1234");
+    userForm.setMatchingPassword("test1234");
+    when(userRepository.findByUsername(anyString())).thenReturn(null);
+    Errors errors = new BeanPropertyBindingResult(userForm, "userForm");
+    new UserValidator(userRepository).validate(userForm, errors);
+    Assertions.assertThat(errors.hasErrors()).isTrue();
+    assertThat(errors.getFieldError("username").getCode()).isEqualTo("username.empty");
+  }
+
+  @Test
+  void shouldGiveErrorWhenUsernameIsEmpty() {
+    UserForm userForm = new UserForm();
+    userForm.setAgree("true");
+    userForm.setUsername("");
+    userForm.setPassword("test1234");
+    userForm.setMatchingPassword("test1234");
+    when(userRepository.findByUsername(anyString())).thenReturn(null);
+    Errors errors = new BeanPropertyBindingResult(userForm, "userForm");
+    new UserValidator(userRepository).validate(userForm, errors);
+    Assertions.assertThat(errors.hasErrors()).isTrue();
+    assertThat(errors.getFieldError("username").getCode()).isEqualTo("username.empty");
+  }
+
+  @Test
+  void shouldGiveErrorWhenPasswordIsSameAsUsername() {
+    UserForm userForm = new UserForm();
+    userForm.setAgree("true");
+    userForm.setUsername("test1234");
+    userForm.setPassword("test1234");
+    userForm.setMatchingPassword("test1234");
+    when(userRepository.findByUsername(anyString())).thenReturn(null);
+    Errors errors = new BeanPropertyBindingResult(userForm, "userForm");
+    new UserValidator(userRepository).validate(userForm, errors);
+    Assertions.assertThat(errors.hasErrors()).isTrue();
+    assertThat(errors.getFieldError("password").getCode()).isEqualTo("password.username");
   }
 }

@@ -24,12 +24,20 @@ public class UserValidator implements Validator {
   public void validate(Object o, Errors errors) {
     UserForm userForm = (UserForm) o;
 
+    if (userForm.getUsername() == null || userForm.getUsername().trim().isEmpty()) {
+      errors.rejectValue("username", "username.empty");
+    }
+
     if (userRepository.findByUsername(userForm.getUsername()) != null) {
       errors.rejectValue("username", "username.duplicate");
     }
 
     if (!userForm.getMatchingPassword().equals(userForm.getPassword())) {
       errors.rejectValue("matchingPassword", "password.diff");
+    }
+
+    if (userForm.getUsername() != null && userForm.getUsername().equals(userForm.getPassword())) {
+      errors.rejectValue("password", "password.username");
     }
   }
 }
