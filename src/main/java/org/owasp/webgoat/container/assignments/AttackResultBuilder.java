@@ -6,16 +6,32 @@ package org.owasp.webgoat.container.assignments;
 
 public class AttackResultBuilder {
 
-  private boolean assignmentCompleted;
+  private enum ResultType {
+    SUCCESS(true, "assignment.solved", true),
+    FAILED(false, "assignment.not.solved", true),
+    INFORMATION(false, null, false);
+
+    private final boolean lessonCompleted;
+    private final String defaultFeedback;
+    private final boolean attemptWasMade;
+
+    ResultType(boolean lessonCompleted, String defaultFeedback, boolean attemptWasMade) {
+      this.lessonCompleted = lessonCompleted;
+      this.defaultFeedback = defaultFeedback;
+      this.attemptWasMade = attemptWasMade;
+    }
+  }
+
+  private boolean lessonCompleted;
   private Object[] feedbackArgs;
-  private String feedbackResourceBundleKey;
+  private String feedback;
   private String output;
   private Object[] outputArgs;
-  private AssignmentEndpoint assignment;
+  private String assignment;
   private boolean attemptWasMade = false;
 
   public AttackResultBuilder assignmentCompleted(boolean lessonCompleted) {
-    this.assignmentCompleted = lessonCompleted;
+    this.lessonCompleted = lessonCompleted;
     return this;
   }
 
@@ -24,8 +40,8 @@ public class AttackResultBuilder {
     return this;
   }
 
-  public AttackResultBuilder feedback(String resourceBundleKey) {
-    this.feedbackResourceBundleKey = resourceBundleKey;
+  public AttackResultBuilder feedback(String feedback) {
+    this.feedback = feedback;
     return this;
   }
 
@@ -40,24 +56,53 @@ public class AttackResultBuilder {
   }
 
   public AttackResultBuilder attemptWasMade() {
-    this.attemptWasMade = true;
+    return attemptWasMade(true);
+  }
+
+  public AttackResultBuilder attemptWasMade(boolean attemptWasMade) {
+    this.attemptWasMade = attemptWasMade;
     return this;
   }
 
   public AttackResult build() {
     return new AttackResult(
-            assignmentCompleted,
-        feedbackResourceBundleKey,
-        feedbackArgs,
-        output,
-        outputArgs,
-        assignment.getClass().getSimpleName(),
-        attemptWasMade);
+        lessonCompleted, feedback, feedbackArgs, output, outputArgs, assignment, attemptWasMade);
+  }
+
+  AttackResult buildResolved() {
+    return new AttackResult(lessonCompleted, feedback, output, assignment, attemptWasMade);
   }
 
   public AttackResultBuilder assignment(AssignmentEndpoint assignment) {
+    return assignment(assignment.getClass().getSimpleName());
+  }
+
+  AttackResultBuilder assignment(String assignment) {
     this.assignment = assignment;
     return this;
+  }
+
+  private AttackResultBuilder resultType(ResultType resultType) {
+    this.lessonCompleted = resultType.lessonCompleted;
+    this.feedback = resultType.defaultFeedback;
+    this.attemptWasMade = resultType.attemptWasMade;
+    return this;
+  }
+
+  private static AttackResultBuilder builderFor(
+      AssignmentEndpoint assignment, ResultType resultType) {
+    return new AttackResultBuilder().assignment(assignment).resultType(resultType);
+  }
+
+  public static AttackResultBuilder copyOf(AttackResult attackResult) {
+    return new AttackResultBuilder()
+        .assignment(attackResult.getAssignment())
+        .assignmentCompleted(attackResult.isLessonCompleted())
+        .feedback(attackResult.getFeedback())
+        .feedbackArgs(attackResult.getFeedbackArgs())
+        .output(attackResult.getOutput())
+        .outputArgs(attackResult.getOutputArgs())
+        .attemptWasMade(attackResult.isAttemptWasMade());
   }
 
   /**
@@ -71,11 +116,7 @@ public class AttackResultBuilder {
    * @return a builder for creating a result from a lesson
    */
   public static AttackResultBuilder success(AssignmentEndpoint assignment) {
-    return new AttackResultBuilder()
-        .assignmentCompleted(true)
-        .attemptWasMade()
-        .feedback("assignment.solved")
-        .assignment(assignment);
+    return builderFor(assignment, ResultType.SUCCESS);
   }
 
   /**
@@ -89,14 +130,10 @@ public class AttackResultBuilder {
    * @return a builder for creating a result from a lesson
    */
   public static AttackResultBuilder failed(AssignmentEndpoint assignment) {
-    return new AttackResultBuilder()
-        .assignmentCompleted(false)
-        .attemptWasMade()
-        .feedback("assignment.not.solved")
-        .assignment(assignment);
+    return builderFor(assignment, ResultType.FAILED);
   }
 
   public static AttackResultBuilder informationMessage(AssignmentEndpoint assignment) {
-    return new AttackResultBuilder().assignmentCompleted(false).assignment(assignment);
+    return builderFor(assignment, ResultType.INFORMATION);
   }
 }

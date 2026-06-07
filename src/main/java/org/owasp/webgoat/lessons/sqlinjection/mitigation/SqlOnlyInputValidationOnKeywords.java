@@ -9,6 +9,7 @@ import static org.owasp.webgoat.container.assignments.AttackResultBuilder.failed
 import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
 import org.owasp.webgoat.container.assignments.AssignmentHints;
 import org.owasp.webgoat.container.assignments.AttackResult;
+import org.owasp.webgoat.container.assignments.AttackResultBuilder;
 import org.owasp.webgoat.lessons.sqlinjection.advanced.SqlInjectionLesson6a;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -39,13 +40,6 @@ public class SqlOnlyInputValidationOnKeywords implements AssignmentEndpoint {
       return failed(this).feedback("SqlOnlyInputValidationOnKeywords-failed").build();
     }
     AttackResult attackResult = lesson6a.injectableQuery(userId);
-    return new AttackResult(
-        attackResult.isLessonCompleted(),
-        attackResult.getFeedback(),
-        attackResult.getFeedbackArgs(),
-        attackResult.getOutput(),
-        attackResult.getOutputArgs(),
-        getClass().getSimpleName(),
-        true);
+    return AttackResultBuilder.copyOf(attackResult).assignment(this).attemptWasMade().build();
   }
 }

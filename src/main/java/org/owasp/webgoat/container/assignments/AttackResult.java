@@ -20,7 +20,7 @@ public class AttackResult {
   private final String assignment;
   private final boolean attemptWasMade;
 
-  private AttackResult(
+  AttackResult(
       boolean lessonCompleted,
       String feedback,
       String output,
@@ -33,7 +33,7 @@ public class AttackResult {
     this.attemptWasMade = attemptWasMade;
   }
 
-  public AttackResult(
+  AttackResult(
       boolean lessonCompleted,
       String feedback,
       Object[] feedbackArgs,
@@ -55,11 +55,9 @@ public class AttackResult {
   }
 
   public AttackResult apply(PluginMessages pluginMessages) {
-    return new AttackResult(
-        lessonCompleted,
-        pluginMessages.getMessage(feedback, feedback, feedbackArgs),
-        pluginMessages.getMessage(output, output, outputArgs),
-        assignment,
-        attemptWasMade);
+    return AttackResultBuilder.copyOf(this)
+        .feedback(pluginMessages.getMessage(feedback, feedback, feedbackArgs))
+        .output(pluginMessages.getMessage(output, output, outputArgs))
+        .buildResolved();
   }
 }
