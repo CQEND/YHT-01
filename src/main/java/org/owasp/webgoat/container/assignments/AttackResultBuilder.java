@@ -43,6 +43,11 @@ public class AttackResultBuilder {
     this.attemptWasMade = true;
     return this;
   }
+  
+  public AttackResultBuilder attemptWasMade(boolean attemptWasMade) {
+    this.attemptWasMade = attemptWasMade;
+    return this;
+  }
 
   public AttackResult build() {
     return new AttackResult(
@@ -58,6 +63,17 @@ public class AttackResultBuilder {
   public AttackResultBuilder assignment(AssignmentEndpoint assignment) {
     this.assignment = assignment;
     return this;
+  }
+
+  public static AttackResultBuilder from(AttackResult attackResult, AssignmentEndpoint assignment) {
+    return new AttackResultBuilder()
+        .assignmentCompleted(attackResult.isLessonCompleted())
+        .feedback(attackResult.getFeedback())
+        .feedbackArgs(attackResult.getFeedbackArgs())
+        .output(attackResult.getOutput())
+        .outputArgs(attackResult.getOutputArgs())
+        .attemptWasMade(attackResult.isAttemptWasMade())
+        .assignment(assignment);
   }
 
   /**
