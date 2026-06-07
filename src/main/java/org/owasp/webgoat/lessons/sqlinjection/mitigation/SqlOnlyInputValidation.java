@@ -5,6 +5,7 @@
 package org.owasp.webgoat.lessons.sqlinjection.mitigation;
 
 import static org.owasp.webgoat.container.assignments.AttackResultBuilder.failed;
+import static org.owasp.webgoat.container.assignments.AttackResultBuilder.from;
 
 import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
 import org.owasp.webgoat.container.assignments.AssignmentHints;
@@ -33,13 +34,9 @@ public class SqlOnlyInputValidation implements AssignmentEndpoint {
       return failed(this).feedback("SqlOnlyInputValidation-failed").build();
     }
     AttackResult attackResult = lesson6a.injectableQuery(userId);
-    return new AttackResult(
-        attackResult.isLessonCompleted(),
-        attackResult.getFeedback(),
-        attackResult.getFeedbackArgs(),
-        attackResult.getOutput(),
-        attackResult.getOutputArgs(),
-        getClass().getSimpleName(),
-        true);
+    return from(attackResult)
+        .assignment(this)
+        .attemptWasMade()
+        .build();
   }
 }

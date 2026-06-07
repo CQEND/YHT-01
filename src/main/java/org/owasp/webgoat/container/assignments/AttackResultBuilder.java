@@ -46,13 +46,33 @@ public class AttackResultBuilder {
 
   public AttackResult build() {
     return new AttackResult(
-            assignmentCompleted,
+        assignmentCompleted,
         feedbackResourceBundleKey,
         feedbackArgs,
         output,
         outputArgs,
-        assignment.getClass().getSimpleName(),
+        assignment != null ? assignment.getClass().getSimpleName() : "",
         attemptWasMade);
+  }
+
+  /**
+   * Create a builder pre-populated from an existing AttackResult, allowing selective override.
+   *
+   * @param existing the existing result to copy fields from
+   * @return a builder with all fields copied from the existing result
+   */
+  public static AttackResultBuilder from(AttackResult existing) {
+    AttackResultBuilder builder =
+        new AttackResultBuilder()
+            .assignmentCompleted(existing.isLessonCompleted())
+            .feedback(existing.getFeedback())
+            .feedbackArgs(existing.getFeedbackArgs())
+            .output(existing.getOutput())
+            .outputArgs(existing.getOutputArgs());
+    if (existing.isAttemptWasMade()) {
+      builder.attemptWasMade();
+    }
+    return builder;
   }
 
   public AttackResultBuilder assignment(AssignmentEndpoint assignment) {

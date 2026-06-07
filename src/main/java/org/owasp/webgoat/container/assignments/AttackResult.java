@@ -33,7 +33,7 @@ public class AttackResult {
     this.attemptWasMade = attemptWasMade;
   }
 
-  public AttackResult(
+  AttackResult(
       boolean lessonCompleted,
       String feedback,
       Object[] feedbackArgs,
