@@ -24,8 +24,14 @@ public class UserValidator implements Validator {
   public void validate(Object o, Errors errors) {
     UserForm userForm = (UserForm) o;
 
-    if (userRepository.findByUsername(userForm.getUsername()) != null) {
+    if (userForm.getUsername() == null || userForm.getUsername().trim().isEmpty()) {
+      errors.rejectValue("username", "username.empty");
+    } else if (userRepository.findByUsername(userForm.getUsername()) != null) {
       errors.rejectValue("username", "username.duplicate");
+    }
+
+    if (userForm.getPassword() != null && userForm.getPassword().equals(userForm.getUsername())) {
+      errors.rejectValue("password", "password.same.as.username");
     }
 
     if (!userForm.getMatchingPassword().equals(userForm.getPassword())) {
