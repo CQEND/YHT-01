@@ -26,8 +26,8 @@ class UserValidatorTest {
     UserForm userForm = new UserForm();
     userForm.setAgree("true");
     userForm.setUsername("test1234");
-    userForm.setPassword("test1234");
-    userForm.setMatchingPassword("test1234");
+    userForm.setPassword("password1");
+    userForm.setMatchingPassword("password1");
     Errors errors = new BeanPropertyBindingResult(userForm, "userForm");
     new UserValidator(userRepository).validate(userForm, errors);
     Assertions.assertThat(errors.hasErrors()).isFalse();
@@ -51,13 +51,52 @@ class UserValidatorTest {
     UserForm userForm = new UserForm();
     userForm.setAgree("true");
     userForm.setUsername("test12345");
-    userForm.setPassword("test12345");
-    userForm.setMatchingPassword("test12345");
+    userForm.setPassword("password1");
+    userForm.setMatchingPassword("password1");
     when(userRepository.findByUsername(anyString()))
         .thenReturn(new WebGoatUser("test1245", "password"));
     Errors errors = new BeanPropertyBindingResult(userForm, "userForm");
     new UserValidator(userRepository).validate(userForm, errors);
     Assertions.assertThat(errors.hasErrors()).isTrue();
     assertThat(errors.getFieldError("username").getCode()).isEqualTo("username.duplicate");
+  }
+
+  @Test
+  void shouldGiveErrorWhenUsernameIsBlank() {
+    UserForm userForm = new UserForm();
+    userForm.setAgree("true");
+    userForm.setUsername("   ");
+    userForm.setPassword("password1");
+    userForm.setMatchingPassword("password1");
+    Errors errors = new BeanPropertyBindingResult(userForm, "userForm");
+    new UserValidator(userRepository).validate(userForm, errors);
+    Assertions.assertThat(errors.hasErrors()).isTrue();
+    assertThat(errors.getFieldError("username").getCode()).isEqualTo("username.blank");
+  }
+
+  @Test
+  void shouldGiveErrorWhenUsernameIsEmpty() {
+    UserForm userForm = new UserForm();
+    userForm.setAgree("true");
+    userForm.setUsername("");
+    userForm.setPassword("password1");
+    userForm.setMatchingPassword("password1");
+    Errors errors = new BeanPropertyBindingResult(userForm, "userForm");
+    new UserValidator(userRepository).validate(userForm, errors);
+    Assertions.assertThat(errors.hasErrors()).isTrue();
+    assertThat(errors.getFieldError("username").getCode()).isEqualTo("username.blank");
+  }
+
+  @Test
+  void shouldGiveErrorWhenPasswordSameAsUsername() {
+    UserForm userForm = new UserForm();
+    userForm.setAgree("true");
+    userForm.setUsername("test1234");
+    userForm.setPassword("test1234");
+    userForm.setMatchingPassword("test1234");
+    Errors errors = new BeanPropertyBindingResult(userForm, "userForm");
+    new UserValidator(userRepository).validate(userForm, errors);
+    Assertions.assertThat(errors.hasErrors()).isTrue();
+    assertThat(errors.getFieldError("password").getCode()).isEqualTo("password.same.as.username");
   }
 }
